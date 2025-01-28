@@ -12,6 +12,9 @@ cleared before execution in the settings.
 # TODO: 
     # up / down (based on motor pos.)
 #####   Importing Packages   #####
+import os
+os.chdir(r"C:\Users\GriggsLab_Y\Documents\software\griggs_control\src")
+print(os.getcwd())
 from modules.GUI_v3 import run_app
 from modules.Motor import disconnect_motors
 

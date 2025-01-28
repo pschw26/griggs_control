@@ -34,9 +34,6 @@ def init_gui(win):
     win.maxvel_spinBox.setValue(120)
     win.module_s1.maxvel = win.maxvel_spinBox.value()
     win.module_s3.maxvel = 60
-    # disable usability for opening valve functions in manual s3 mode
-    win.pushB_multi_up_s3.setEnabled(False)
-    win.pushB_perm_up_s3.setEnabled(False)
     # set color of clo0sed button default to opened:
     # win.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
     

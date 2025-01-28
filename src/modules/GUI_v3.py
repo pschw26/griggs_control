@@ -93,6 +93,8 @@ class Window(QMainWindow, Ui_MainWindow):
         # choose s3 motor for starting tab:
         self.module = self.module_s3
         self.motor = self.motor_s3
+        #for debugging inital position offset if motor is getting disconnected
+        # print("S3 position:", self.motor_s3.actual_position)
         # for motor s1:
         # self.last_motor_command_s1 = None
         # PID
@@ -118,20 +120,23 @@ class Window(QMainWindow, Ui_MainWindow):
         self.threshold_oilp = 0.5
         # import positions for quenching 
         self.positions = pd.read_csv(
-        'C:/Users/GriggsLab_Y/Documents/software/griggs_control/src/positions_valve.txt', sep='\,')
+            'C:/Users/GriggsLab_Y/Documents/software/griggs_control/src/positions_valve.txt', sep='\,',engine='python')
         # self.positions = pd.read_csv(
         # 'C:/Daten/Peter/Studium/A_Programme_Hiwi/Projekte/griggs_control/src/positions_valve.txt', sep='\t') 
-        if self.motor_s3.actual_position != int(self.positions.loc[0, 'current']):
-            self.positions['opened'] = self.positions['opened']-self.positions['current']
-            self.positions['closed'] = self.positions['closed']-self.positions['current']
-            self.positions.to_csv(
-            'C:/Users/GriggsLab_Y/Documents/software/griggs_control/src/positions_valve.txt', index=False)
+        # if self.motor_s3.actual_position != int(self.positions.loc[0, 'current']):
+            # self.positions['opened'] = self.positions['opened']-self.positions['current']
+            # self.positions['closed'] = self.positions['closed']-self.positions['current']
+            # self.positions.to_csv(
+            # 'C:/Users/GriggsLab_Y/Documents/software/griggs_control/src/positions_valve.txt', index=False)
         self.valve_closed = int(self.positions.loc[0, 'closed'])
         self.valve_distance = int(self.positions.loc[0, 'distance'])
         self.valve_current = int(self.positions.loc[0, 'current'])
-        self.valve_opened = self.valve_closed + self.valve_distance
+        self.valve_opened = self.valve_closed + self.valve_distance 
+        # valve offset in case s3 position is 0 after power disconnnection
+        self.valve_init_offset = abs(self.motor_s3.actual_position) + self.valve_current
+        print(f"valve offset was:{self.valve_init_offset}" )
         self.is_valve_closed()
-        self.label_s3.setText(f'{1000 - round(((self.motor_s3.actual_position - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+        self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
         
     def set_timers(self):
         self.basetimer = 100 # in ms
@@ -216,6 +221,8 @@ class Window(QMainWindow, Ui_MainWindow):
         
     def is_valve_closed(self):
         if abs(self.valve_closed - self.valve_current) > self.threshold_valve:
+            # self.pushB_multi_up_s3.setEnabled(False)
+            # self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
             print('Warning: oil valve is not closed all the way!',
                   f'Motor is off by = {abs(self.valve_closed - self.valve_current)} steps',  
@@ -469,7 +476,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('updated parameters for quenching mode')
             
     def update_position(self):
-        self.positions.loc[0, 'current'] = self.motor_s3.actual_position
+        self.positions.loc[0, 'current'] = self.motor_s3.actual_position+self.valve_init_offset
         self.positions.to_csv(
         'C:/Users/GriggsLab_Y/Documents/software/griggs_control/src/positions_valve.txt', index = False)
             
@@ -511,7 +518,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('Rotating down with', str(self.rpmBox_s3.value()), 'rpm')
             while self.motor_s3.actual_velocity != 0:
                 QApplication.processEvents()
-                self.label_s3.setText(f'{1000 - round(((self.motor_s3.actual_position - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+                self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
     
     def permanent_up(self):
         self.module.dir = 1
@@ -526,7 +533,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('Rotating up with', str(self.rpmBox_s3.value()), 'rpm')
             while self.motor_s3.actual_velocity != 0:
                 QApplication.processEvents()
-                self.label_s3.setText(f'{1000 - round(((self.motor_s3.actual_position - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+                self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
 
     def multi_step_down(self):
         self.module.dir = -1
@@ -551,7 +558,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('Coarse step up with module:', str(self.module.moduleID), 'at', str(self.rpmBox_s3.value()), 'RPM')
         # at this hirarchy, update_pos makes sure motor updates position when reached, not while driving there?
         self.update_position()
-        self.label_s3.setText(f'{1000 - round(((self.motor_s3.actual_position - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+        self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
     
     
     def goto_s3(self, pos, rpm):
@@ -567,14 +574,14 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
         # while not self.motor_s3.get_position_reached() == 1:
         # QApplication.processEvents()
-        self.label_s3.setText(f'{1000 - round(((self.motor_s3.actual_position - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+        self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
         # when closed
-        if abs(self.motor_s3.actual_position - pos) <= self.threshold_valve:
+        if abs((self.motor_s3.actual_position+self.valve_init_offset) - pos) <= self.threshold_valve:
             self.update_position()
             self.pushB_multi_up_s3.setEnabled(True)
             self.pushB_perm_up_s3.setEnabled(True)
             self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
-            self.label_s3.setText(f'{1000 - round(((self.motor_s3.actual_position - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+            self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
             
     def prequench_hold(self, threshold):
         if self.drivetimer.isActive():
@@ -586,7 +593,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('this function is only enabled if quench PID is operating!')
             
     def set_closed(self):
-        self.valve_closed = self.module_s3.motor.actual_position
+        self.valve_closed = self.module_s3.motor.actual_position+self.valve_init_offset
         self.valve_opened = self.valve_closed + self.valve_distance #TODO: does this work?
         self.positions.loc[0, 'closed'] = self.valve_closed
         self.positions.to_csv(
@@ -652,10 +659,12 @@ class Window(QMainWindow, Ui_MainWindow):
             if (self.old_oilp - self.current_oilp) < self.threshold_oilp and self.enable_slow == False:
                 # no: open valve fast (prequench velocity)
                 self.goto_s3(self.valve_opened, self.prequench_rpm)
+                print("prequench velocity set", self.valve_opened, self.motor_s3.actual_position+self.valve_init_offset)
             elif (self.old_oilp - self.current_oilp) >= self.threshold_oilp or self.enable_slow == True:
                 # yes: open valve slow (quench velocity)
                 self.enable_slow = True
                 self.goto_s3(self.valve_opened, self.quench_rpm)
+                print("quench velocity set", self.valve_opened, self.motor_s3.actual_position+self.valve_init_offset)
             # compare old oilp with new measured value #TODO: test this!!
             self.old_oilp = self.current_oilp
             
