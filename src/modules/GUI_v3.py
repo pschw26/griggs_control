@@ -132,9 +132,19 @@ class Window(QMainWindow, Ui_MainWindow):
         self.valve_distance = int(self.positions.loc[0, 'distance'])
         self.valve_current = int(self.positions.loc[0, 'current'])
         self.valve_opened = self.valve_closed + self.valve_distance 
-        # valve offset in case s3 position is 0 after power disconnnection
-        self.valve_init_offset = abs(self.motor_s3.actual_position) + self.valve_current
-        print(f"valve offset was:{self.valve_init_offset}" )
+        # only negative positons are valid for current code TODO: adapt code to work with positive positions
+        if self.valve_closed > 0 or self.valve_opened > 0:
+            self.close_app()
+            raise ValueError('positions in positions_valve.txt have unexpected values >0')
+        # if power to s3 was cut, restore actual current position by manipulating the distance var and rewrite opened pos
+        # following statement is true only if actual pos of s3 is zero
+        if (self.motor_s3.actual_position + self.valve_current) == self.valve_current:
+            self.valve_init_offset = self.valve_current
+        elif self.motor_s3.actual_position == self.valve_current:
+            self.valve_init_offset = 0
+        else:
+            self.close_app()
+            raise ValueError('actual position of s3-motor and current positon in positions_valve.txt do not match')
         self.is_valve_closed()
         self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
         
@@ -221,8 +231,8 @@ class Window(QMainWindow, Ui_MainWindow):
         
     def is_valve_closed(self):
         if abs(self.valve_closed - self.valve_current) > self.threshold_valve:
-            # self.pushB_multi_up_s3.setEnabled(False)
-            # self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
+            self.pushB_multi_up_s3.setEnabled(False)
+            self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
             print('Warning: oil valve is not closed all the way!',
                   f'Motor is off by = {abs(self.valve_closed - self.valve_current)} steps',  
@@ -502,6 +512,7 @@ class Window(QMainWindow, Ui_MainWindow):
         # # print('debug: stop', self.module.moduleID, act_pos, targ_pos) # debug message
         if self.module == self.module_s3:
             self.update_position()
+            self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
         self.clear_button_colors()
         print('Motor', self.module.moduleID, 'stopped!')
 
@@ -568,15 +579,13 @@ class Window(QMainWindow, Ui_MainWindow):
         # 'C:/Daten/Peter/Studium/A_Programme_Hiwi/Projekte/griggs_control/src/position_quenched.csv', index = False) 
         pps = round(rpm * self.module_s3.msteps_per_rev/60)
         self.motor_s3.move_to(pos, pps)
-        # keep record of position with get_position_reached
+        # reset open_by functions for valve operation
         self.pushB_multi_up_s3.setEnabled(False)
         self.pushB_perm_up_s3.setEnabled(False)
         self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
-        # while not self.motor_s3.get_position_reached() == 1:
-        # QApplication.processEvents()
         self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
-        # when closed
-        if abs((self.motor_s3.actual_position+self.valve_init_offset) - pos) <= self.threshold_valve:
+        # when valve closed
+        if abs(self.motor_s3.actual_position - pos) <= self.threshold_valve:
             self.update_position()
             self.pushB_multi_up_s3.setEnabled(True)
             self.pushB_perm_up_s3.setEnabled(True)

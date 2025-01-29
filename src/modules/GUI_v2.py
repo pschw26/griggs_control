@@ -68,13 +68,15 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_get_adc.clicked.connect(lambda: print('channel sig1(value / voltage): 69 / 420 \n'
                                                       'channel sig3(value / voltage): 187 / 1312'))
         self.positions = pd.read_csv(
-        r'C:\Users\wq271\AAA_programming\Projects\griggs_control\src\positions_valve.txt', sep='\t')
+        r'C:\Users\wq271\AAA_programming\Projects\griggs_control\src\positions_valve_test.txt', sep=',')
         self.valve_closed = self.positions.loc[0, 'closed']
         self.valve_distance = self.positions.loc[0, 'distance']
         self.valve_current = self.positions.loc[0, 'current']
         self.valve_opened = self.valve_closed + self.valve_distance
         self.label_s3.setText(f'{1000 - round(((self.valve_current - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
-        
+        if self.valve_closed > 0 or self.valve_opened > 0:
+            self.refresh_module_list(self.module_s3)
+            raise ValueError('positions in positions_valve.txt have unexpected values >0')
 
     def set_default_values(self):
         pass
