@@ -1,0 +1,2 @@
+closed,distance,current
+164032,145120,164032
