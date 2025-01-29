@@ -221,8 +221,8 @@ class Window(QMainWindow, Ui_MainWindow):
         
     def is_valve_closed(self):
         if abs(self.valve_closed - self.valve_current) > self.threshold_valve:
-            # self.pushB_multi_up_s3.setEnabled(False)
-            # self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
+            self.pushB_multi_up_s3.setEnabled(False)
+            self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
             print('Warning: oil valve is not closed all the way!',
                   f'Motor is off by = {abs(self.valve_closed - self.valve_current)} steps',  
@@ -659,12 +659,12 @@ class Window(QMainWindow, Ui_MainWindow):
             if (self.old_oilp - self.current_oilp) < self.threshold_oilp and self.enable_slow == False:
                 # no: open valve fast (prequench velocity)
                 self.goto_s3(self.valve_opened, self.prequench_rpm)
-                print("prequench velocity set", self.valve_opened, self.motor_s3.actual_position+self.valve_init_offset)
+                # print("prequench velocity set", self.valve_opened, self.motor_s3.actual_position+self.valve_init_offset)
             elif (self.old_oilp - self.current_oilp) >= self.threshold_oilp or self.enable_slow == True:
                 # yes: open valve slow (quench velocity)
                 self.enable_slow = True
                 self.goto_s3(self.valve_opened, self.quench_rpm)
-                print("quench velocity set", self.valve_opened, self.motor_s3.actual_position+self.valve_init_offset)
+                # print("quench velocity set")
             # compare old oilp with new measured value #TODO: test this!!
             self.old_oilp = self.current_oilp
             
