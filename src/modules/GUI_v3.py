@@ -133,18 +133,24 @@ class Window(QMainWindow, Ui_MainWindow):
         self.valve_current = int(self.positions.loc[0, 'current'])
         self.valve_opened = self.valve_closed + self.valve_distance 
         # only negative positons are valid for current code TODO: adapt code to work with positive positions
-        if self.valve_closed > 0 or self.valve_opened > 0:
+        if self.valve_closed > 0:
             self.close_app()
-            raise ValueError('positions in positions_valve.txt have unexpected values >0')
+            raise ValueError('valve_closed position in positions_valve.txt has unexpected value >0')
         # if power to s3 was cut, restore actual current position by manipulating the distance var and rewrite opened pos
         # following statement is true only if actual pos of s3 is zero
+        print(f"actual position:{self.motor_s3.actual_position}, current position file: {self.valve_current}" )
         if (self.motor_s3.actual_position + self.valve_current) == self.valve_current:
             self.valve_init_offset = self.valve_current
+            self.valve_closed -= self.valve_current
+            self.valve_opened = self.valve_closed + self.valve_distance 
         elif self.motor_s3.actual_position == self.valve_current:
             self.valve_init_offset = 0
         else:
+            # introduce offset var so update_pos in close_app(stop_motors(())) knows this var
+            self.valve_init_offset = 0
             self.close_app()
             raise ValueError('actual position of s3-motor and current positon in positions_valve.txt do not match')
+        print(f"valve offset is: {self.valve_init_offset}, closed position is: {self.valve_closed}, opened: {self.valve_opened}")
         self.is_valve_closed()
         self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
         
@@ -230,6 +236,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_get_adc.clicked.connect(lambda: print(f'channel sig1(value / voltage){self.chan_s1.value} / {self.chan_s1.voltage} channel sig3(value / voltage){self.chan_s3.value} / {self.chan_s3.voltage}'))
         
     def is_valve_closed(self):
+        # print(f"closed: {self.valve_closed} current: {self.valve_current}")
         if abs(self.valve_closed - self.valve_current) > self.threshold_valve:
             self.pushB_multi_up_s3.setEnabled(False)
             self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
@@ -578,6 +585,7 @@ class Window(QMainWindow, Ui_MainWindow):
         # self.positions.to_csv(
         # 'C:/Daten/Peter/Studium/A_Programme_Hiwi/Projekte/griggs_control/src/position_quenched.csv', index = False) 
         pps = round(rpm * self.module_s3.msteps_per_rev/60)
+        print(f"goto_s3 works, aiming for {pos} currently at {self.motor_s3.actual_position}")
         self.motor_s3.move_to(pos, pps)
         # reset open_by functions for valve operation
         self.pushB_multi_up_s3.setEnabled(False)
@@ -607,6 +615,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.positions.loc[0, 'closed'] = self.valve_closed
         self.positions.to_csv(
         'C:/Users/GriggsLab_Y/Documents/software/griggs_control/src/positions_valve.txt', index = False)
+        print("set closed position is done")
         self.pushB_multi_up_s3.setEnabled(True)
         self.pushB_perm_up_s3.setEnabled(True)
         self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
@@ -668,12 +677,10 @@ class Window(QMainWindow, Ui_MainWindow):
             if (self.old_oilp - self.current_oilp) < self.threshold_oilp and self.enable_slow == False:
                 # no: open valve fast (prequench velocity)
                 self.goto_s3(self.valve_opened, self.prequench_rpm)
-                # print("prequench velocity set", self.valve_opened, self.motor_s3.actual_position+self.valve_init_offset)
             elif (self.old_oilp - self.current_oilp) >= self.threshold_oilp or self.enable_slow == True:
                 # yes: open valve slow (quench velocity)
                 self.enable_slow = True
                 self.goto_s3(self.valve_opened, self.quench_rpm)
-                # print("quench velocity set")
             # compare old oilp with new measured value #TODO: test this!!
             self.old_oilp = self.current_oilp
             
