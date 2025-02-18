@@ -80,7 +80,15 @@ class Window(QMainWindow, Ui_MainWindow):
     from main_window.ui using the pyuic5 command line program, e.g.:
     pyuic5 -x main_window.ui -o main_window_ui.py
     '''    
-    
+    @staticmethod
+    def get_ratio(val, low_bound, up_bound):
+        if not (low_bound <= val <= up_bound):
+            raise ValueError("Value is not within the given bounds.")
+        elif low_bound > up_bound:
+            raise ValueError("Error: lower bound is larger than upper bound!")
+        else: 
+            return (val - low_bound)/(up_bound - low_bound)
+        
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -152,7 +160,7 @@ class Window(QMainWindow, Ui_MainWindow):
             raise ValueError('actual position of s3-motor and current positon in positions_valve.txt do not match')
         print(f"valve offset is: {self.valve_init_offset}, closed position is: {self.valve_closed}, opened: {self.valve_opened}")
         self.is_valve_closed()
-        self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+        self.label_s3.setText(f'{1000 - round(Window.get_ratio(self.valve_current, self.valve_closed, self.valve_opened)*1000)} / 1000 bar')
         
     def set_timers(self):
         self.basetimer = 100 # in ms
