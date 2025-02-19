@@ -24,6 +24,7 @@ if __name__ == "__main__":
     # Start main program with event handling loop:
     try:
         app = run_app()
+    
     except Exception:
         #pass
         print('ERROR')

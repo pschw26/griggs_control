@@ -24,6 +24,13 @@ from modules.set_init_gui_settings_v1 import init_gui
 from modules.popup_warning_v0 import CustomDialog
 from .Motor import Motor
 from .Controller import Controller
+import threading
+import queue
+
+
+
+
+
 
 
 '''TODO:
@@ -80,15 +87,7 @@ class Window(QMainWindow, Ui_MainWindow):
     from main_window.ui using the pyuic5 command line program, e.g.:
     pyuic5 -x main_window.ui -o main_window_ui.py
     '''    
-    @staticmethod
-    def get_ratio(val, low_bound, up_bound):
-        if not (low_bound <= val <= up_bound):
-            raise ValueError("Value is not within the given bounds.")
-        elif low_bound > up_bound:
-            raise ValueError("Error: lower bound is larger than upper bound!")
-        else: 
-            return (val - low_bound)/(up_bound - low_bound)
-        
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
@@ -140,17 +139,25 @@ class Window(QMainWindow, Ui_MainWindow):
         self.valve_distance = int(self.positions.loc[0, 'distance'])
         self.valve_current = int(self.positions.loc[0, 'current'])
         self.valve_opened = self.valve_closed + self.valve_distance 
+        
+        
         # only negative positons are valid for current code TODO: adapt code to work with positive positions
-        if self.valve_closed > 0:
-            self.close_app()
-            raise ValueError('valve_closed position in positions_valve.txt has unexpected value >0')
+        # if self.valve_closed > 0:
+        #     self.close_app()
+        #     raise ValueError('valve_closed position in positions_valve.txt has unexpected value >0')
+            
+            
         # if power to s3 was cut, restore actual current position by manipulating the distance var and rewrite opened pos
         # following statement is true only if actual pos of s3 is zero
         print(f"actual position:{self.motor_s3.actual_position}, current position file: {self.valve_current}" )
+        # following statement is true if actual_pos = 0 
         if (self.motor_s3.actual_position + self.valve_current) == self.valve_current:
-            self.valve_init_offset = self.valve_current
-            self.valve_closed -= self.valve_current
-            self.valve_opened = self.valve_closed + self.valve_distance 
+            if self.valve_current <= 0 and self.valve_closed >= 0:
+                raise ValueError('current position of s3 from file is out of bounds!')
+            else:
+                self.valve_init_offset = self.valve_current
+                self.valve_closed -= self.valve_current
+                self.valve_opened = self.valve_closed + self.valve_distance 
         elif self.motor_s3.actual_position == self.valve_current:
             self.valve_init_offset = 0
         else:
@@ -160,7 +167,38 @@ class Window(QMainWindow, Ui_MainWindow):
             raise ValueError('actual position of s3-motor and current positon in positions_valve.txt do not match')
         print(f"valve offset is: {self.valve_init_offset}, closed position is: {self.valve_closed}, opened: {self.valve_opened}")
         self.is_valve_closed()
-        self.label_s3.setText(f'{1000 - round(Window.get_ratio(self.valve_current, self.valve_closed, self.valve_opened)*1000)} / 1000 bar')
+        self.label_s3.setText(f'{self.get_ratio(self.valve_current, self.valve_closed)} / 1000 bar')
+        
+        
+        # Queue für Kommunikation zwischen Observer und Hauptprogramm
+        # self.q = queue.LifoQueue()# TODO take out before using without proper test
+        
+        # # Starte den Observer-Thread
+        # self.observer_thread = threading.Thread(target=self.observer, daemon=True)start()
+        
+    
+    # def observer(self):# TODO take out before using without proper test
+    #     while True:
+    #         # Wert in die Queue legen
+    #         self.q.put(1000 - round((self.motor_s3.actual_pos - self.valve_closed)/self.valve_distance * 1000))
+
+    #         # Warten, bevor der nächste Durchgang erfolgt
+    #         time.sleep(0.5)
+            
+    # def update_label_button(self):# TODO take out before using without proper test
+    #     if not self.q.empty():
+    #         result = self.q.get()
+    #         self.label_s3.setText(f'{result}/ 1000 bar')
+            
+    #         if abs(abs(self.valve_closed) - abs(self.valve_current)) > self.threshold_valve:
+    #             self.pushB_multi_up_s3.setEnabled(False)
+    #             self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
+    #             self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
+    #         else: 
+    #             self.pushB_multi_up_s3.setEnabled(True)
+    #             self.pushB_perm_up_s3.setEnabled(True) #TODO: enable also for permanent??
+    #             self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
+            
         
     def set_timers(self):
         self.basetimer = 100 # in ms
@@ -245,19 +283,19 @@ class Window(QMainWindow, Ui_MainWindow):
         
     def is_valve_closed(self):
         # print(f"closed: {self.valve_closed} current: {self.valve_current}")
-        if abs(self.valve_closed - self.valve_current) > self.threshold_valve:
+        if abs(abs(self.valve_closed) - abs(self.valve_current)) > self.threshold_valve:
             self.pushB_multi_up_s3.setEnabled(False)
             self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
             print('Warning: oil valve is not closed all the way!',
-                  f'Motor is off by = {abs(self.valve_closed - self.valve_current)} steps',  
+                  f'Motor is off by = {abs(abs(self.valve_closed) - abs(self.valve_current))} steps',  
                   ' press "close oil valve"-button to close it!')
         else: 
             self.pushB_multi_up_s3.setEnabled(True)
             self.pushB_perm_up_s3.setEnabled(True) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
             print('s3 motor valve closed. Motor is off by',
-                  f' = {abs(self.valve_closed - self.valve_current)} steps')
+                  f' = {abs(abs(self.valve_closed) - abs(self.valve_current))} steps')
 
     ###   DATA MANAGEMENT   ###
     
@@ -452,7 +490,16 @@ class Window(QMainWindow, Ui_MainWindow):
     def pps_rpm_converter(self, module, pps):
         rpm = pps / module.msteps_per_rev * 60 
         return round(rpm, 4)
-        
+    
+    def get_ratio(self, val, closed):
+        # print(val, low_bound, up_bound)
+        # if not (low_bound <= val <= up_bound):
+        #     raise ValueError("Value is not within the given bounds.")
+        # elif low_bound > up_bound:
+        #     raise ValueError("Error: lower bound is larger than upper bound!")
+        # else: 
+        return 1000 - round((val - closed)/self.valve_distance * 1000)
+    
     # def pps_calculator(self, rpm_value):
     #     self.module_s1.rpm = rpm_value
     #     self.module_s1.pps = int(round(self.module_s1.rpm * self.module_s1.msteps_per_rev/60))
@@ -527,9 +574,10 @@ class Window(QMainWindow, Ui_MainWindow):
         # # print('debug: stop', self.module.moduleID, act_pos, targ_pos) # debug message
         if self.module == self.module_s3:
             self.update_position()
-            self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+            self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         self.clear_button_colors()
         print('Motor', self.module.moduleID, 'stopped!')
+        
 
     def permanent_down(self):
         self.module.dir = -1
@@ -544,7 +592,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('Rotating down with', str(self.rpmBox_s3.value()), 'rpm')
             while self.motor_s3.actual_velocity != 0:
                 QApplication.processEvents()
-                self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+                self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
     
     def permanent_up(self):
         self.module.dir = 1
@@ -559,7 +607,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('Rotating up with', str(self.rpmBox_s3.value()), 'rpm')
             while self.motor_s3.actual_velocity != 0:
                 QApplication.processEvents()
-                self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+                self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
 
     def multi_step_down(self):
         self.module.dir = -1
@@ -582,10 +630,11 @@ class Window(QMainWindow, Ui_MainWindow):
             self.module.update_pps()
             self.motor.move_by(self.module.dir * self.msteps * self.module.dir_inv_mod, self.module.pps)
             print('Coarse step up with module:', str(self.module.moduleID), 'at', str(self.rpmBox_s3.value()), 'RPM')
+            while self.motor_s3.actual_velocity != 0:
+                QApplication.processEvents()
+                self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         # at this hirarchy, update_pos makes sure motor updates position when reached, not while driving there?
         self.update_position()
-        self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
-    
     
     def goto_s3(self, pos, rpm):
         # update current position to csv every on_timeout-cycle 
@@ -599,14 +648,14 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_multi_up_s3.setEnabled(False)
         self.pushB_perm_up_s3.setEnabled(False)
         self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
-        self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+        self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         # when valve closed
         if abs(self.motor_s3.actual_position - pos) <= self.threshold_valve:
             self.update_position()
             self.pushB_multi_up_s3.setEnabled(True)
             self.pushB_perm_up_s3.setEnabled(True)
             self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
-            self.label_s3.setText(f'{1000 - round((((self.motor_s3.actual_position+self.valve_init_offset) - self.valve_closed)/self.valve_distance)*1000)} / 1000 bar')
+            self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
             
     def prequench_hold(self, threshold):
         if self.drivetimer.isActive():
@@ -623,7 +672,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.positions.loc[0, 'closed'] = self.valve_closed
         self.positions.to_csv(
         'C:/Users/GriggsLab_Y/Documents/software/griggs_control/src/positions_valve.txt', index = False)
-        print("set closed position is done")
+        self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         self.pushB_multi_up_s3.setEnabled(True)
         self.pushB_perm_up_s3.setEnabled(True)
         self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
@@ -762,6 +811,14 @@ def run_app():
     init_gui(main_win)
     # Open GUI window on screen:
     main_win.show()
+    # Main Loop, um die GUI regelmäßig zu aktualisieren
+    # def refresh_loop():        # TODO take out before using without proper test
+    #     while True:
+    #         main_win.update_label_button()
+    #         time.sleep(0.5)
+    
+    # # Starten des GUI-Refresh-Loops in einem eigenen Thread
+    # threading.Thread(target=refresh_loop, daemon=True).start()
     # show dialog pop up:
     dialog = CustomDialog()
     if dialog.exec_():  # Open as a modal dialog and check the return value
