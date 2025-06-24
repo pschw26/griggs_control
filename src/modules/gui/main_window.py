@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'main_window.ui'
+
+# Form implementation generated from reading ui file 'C:\Users\folzn\OneDrive\Dokumente\GitKraken\griggs_control\src\modules\gui\main_window.ui'
+
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -180,7 +182,7 @@ class Ui_MainWindow(object):
         self.rpmBox_s3 = QtWidgets.QDoubleSpinBox(self.tab)
         self.rpmBox_s3.setGeometry(QtCore.QRect(200, 210, 81, 31))
         self.rpmBox_s3.setDecimals(4)
-        self.rpmBox_s3.setMaximum(120.0)
+        self.rpmBox_s3.setMaximum(10.0)
         self.rpmBox_s3.setObjectName("rpmBox_s3")
         self.label_3 = QtWidgets.QLabel(self.tab)
         self.label_3.setGeometry(QtCore.QRect(300, 215, 31, 21))
@@ -279,33 +281,31 @@ class Ui_MainWindow(object):
         self.invert_checkBox.setGeometry(QtCore.QRect(130, 390, 191, 21))
         self.invert_checkBox.setObjectName("invert_checkBox")
         self.lcd_actvel_s1 = QtWidgets.QLCDNumber(self.centralwidget)
-        self.lcd_actvel_s1.setGeometry(QtCore.QRect(500, 120, 64, 23))
+
+        self.lcd_actvel_s1.setGeometry(QtCore.QRect(500, 300, 64, 23))
         self.lcd_actvel_s1.setSmallDecimalPoint(False)
         self.lcd_actvel_s1.setObjectName("lcd_actvel_s1")
         self.label_13 = QtWidgets.QLabel(self.centralwidget)
-        self.label_13.setGeometry(QtCore.QRect(500, 90, 91, 21))
+        self.label_13.setGeometry(QtCore.QRect(500, 270, 91, 21))
         self.label_13.setObjectName("label_13")
-        self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(410, 180, 461, 261))
-        self.label.setObjectName("label")
         self.label_16 = QtWidgets.QLabel(self.centralwidget)
-        self.label_16.setGeometry(QtCore.QRect(660, -10, 181, 101))
+        self.label_16.setGeometry(QtCore.QRect(630, 180, 181, 101))
         self.label_16.setStyleSheet("QLabel{color: rgb(200, 50, 0)}")
         self.label_16.setObjectName("label_16")
         self.lcd_actvel_s3 = QtWidgets.QLCDNumber(self.centralwidget)
-        self.lcd_actvel_s3.setGeometry(QtCore.QRect(500, 160, 64, 23))
+        self.lcd_actvel_s3.setGeometry(QtCore.QRect(500, 340, 64, 23))
         self.lcd_actvel_s3.setObjectName("lcd_actvel_s3")
         self.label_28 = QtWidgets.QLabel(self.centralwidget)
-        self.label_28.setGeometry(QtCore.QRect(420, 110, 61, 31))
+        self.label_28.setGeometry(QtCore.QRect(420, 290, 61, 31))
         self.label_28.setStyleSheet("QLabel{color: rgb(255, 0, 0);}")
         self.label_28.setObjectName("label_28")
         self.label_29 = QtWidgets.QLabel(self.centralwidget)
-        self.label_29.setGeometry(QtCore.QRect(420, 150, 61, 31))
+        self.label_29.setGeometry(QtCore.QRect(420, 330, 61, 31))
         self.label_29.setStyleSheet("QLabel{color: rgb(0, 128, 0)\n"
 ";}")
         self.label_29.setObjectName("label_29")
         self.lcd_stress_s1 = QtWidgets.QLCDNumber(self.centralwidget)
-        self.lcd_stress_s1.setGeometry(QtCore.QRect(590, 120, 64, 23))
+        self.lcd_stress_s1.setGeometry(QtCore.QRect(590, 300, 64, 23))
         self.lcd_stress_s1.setStyleSheet("QLCDNumber {\n"
 "    background-color: rgb(255, 0, 0, 64);\n"
 "}\n"
@@ -313,25 +313,40 @@ class Ui_MainWindow(object):
         self.lcd_stress_s1.setSmallDecimalPoint(False)
         self.lcd_stress_s1.setObjectName("lcd_stress_s1")
         self.label_30 = QtWidgets.QLabel(self.centralwidget)
-        self.label_30.setGeometry(QtCore.QRect(590, 90, 91, 21))
+        self.label_30.setGeometry(QtCore.QRect(590, 270, 91, 21))
         self.label_30.setObjectName("label_30")
         self.lcd_stress_s3 = QtWidgets.QLCDNumber(self.centralwidget)
-        self.lcd_stress_s3.setGeometry(QtCore.QRect(590, 160, 64, 23))
+        self.lcd_stress_s3.setGeometry(QtCore.QRect(590, 340, 64, 23))
         self.lcd_stress_s3.setStyleSheet("QLCDNumber{background-color: rgb(0, 128, 0, 64);}")
         self.lcd_stress_s3.setProperty("value", 0.0)
         self.lcd_stress_s3.setObjectName("lcd_stress_s3")
         self.label_31 = QtWidgets.QLabel(self.centralwidget)
-        self.label_31.setGeometry(QtCore.QRect(680, 90, 131, 21))
+        self.label_31.setGeometry(QtCore.QRect(680, 270, 131, 21))
         self.label_31.setObjectName("label_31")
         self.lcd_dstress = QtWidgets.QLCDNumber(self.centralwidget)
-        self.lcd_dstress.setGeometry(QtCore.QRect(700, 120, 64, 21))
+        self.lcd_dstress.setGeometry(QtCore.QRect(700, 300, 64, 21))
         self.lcd_dstress.setObjectName("lcd_dstress")
         self.pushB_get_adc = QtWidgets.QPushButton(self.centralwidget)
-        self.pushB_get_adc.setGeometry(QtCore.QRect(420, 40, 111, 31))
+        self.pushB_get_adc.setGeometry(QtCore.QRect(420, 220, 111, 31))
         self.pushB_get_adc.setObjectName("pushB_get_adc")
+        self.tabWidget_2 = QtWidgets.QTabWidget(self.centralwidget)
+        self.tabWidget_2.setGeometry(QtCore.QRect(410, 0, 421, 171))
+        self.tabWidget_2.setObjectName("tabWidget_2")
+        self.tab_5 = QtWidgets.QWidget()
+        self.tab_5.setObjectName("tab_5")
+        self.label_12 = QtWidgets.QLabel(self.tab_5)
+        self.label_12.setGeometry(QtCore.QRect(10, 0, 411, 61))
+        self.label_12.setObjectName("label_12")
+        self.tabWidget_2.addTab(self.tab_5, "")
+        self.tab_6 = QtWidgets.QWidget()
+        self.tab_6.setObjectName("tab_6")
+        self.label_19 = QtWidgets.QLabel(self.tab_6)
+        self.label_19.setGeometry(QtCore.QRect(10, 0, 411, 161))
+        self.label_19.setObjectName("label_19")
+        self.tabWidget_2.addTab(self.tab_6, "")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 835, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 835, 26))
         self.menubar.setObjectName("menubar")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
@@ -340,6 +355,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(2)
+        self.tabWidget_2.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -395,13 +411,17 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), _translate("MainWindow", "Quenching"))
         self.invert_checkBox.setText(_translate("MainWindow", "invert direction: pos 2 / 4"))
         self.label_13.setText(_translate("MainWindow", "actual velocity"))
-        self.label.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:9pt;\">General:</span></p><p>- get ADC prints adc value and voltage of σ<span style=\" font-size:9pt; vertical-align:sub;\">1 </span><span style=\" font-size:9pt;\">l</span>oadcell and σ<span style=\" vertical-align:sub;\">3 </span>oilpressure</p><p>in console</p><p>- for redefinition of closed with perm close, use v &lt;= 0.25 RPM!</p><p><span style=\" font-size:9pt;\">For Quenching: </span></p><p>- prequench rpm: to open valve until oilpressure changes (fast)</p><p>- quench rpm: to open the valve all the way open (slow)</p><p>(target position := valve all the way opened)</p><p>- dsigma setpoint is the const. diff. stress [Mpa] </p><p>s1 establishes via PID as a passive reaction on s3 action<br/></p></body></html>"))
         self.label_16.setText(_translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600;\">close</span> app<span style=\" font-weight:600;\"> only </span></p><p align=\"center\">via the <span style=\" font-weight:600;\">QUIT-button!</span></p></body></html>"))
         self.label_28.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:9pt;\">Motor σ</span><span style=\" font-size:9pt; vertical-align:sub;\">1</span></p></body></html>"))
         self.label_29.setText(_translate("MainWindow", "<html><head/><body><p><span style=\" font-size:9pt;\">Motor σ</span><span style=\" vertical-align:sub;\">3</span></p></body></html>"))
         self.label_30.setText(_translate("MainWindow", "stress [MPa]"))
         self.label_31.setText(_translate("MainWindow", "differential Stress [MPa]"))
         self.pushB_get_adc.setText(_translate("MainWindow", "get ADC"))
+        self.label_12.setText(_translate("MainWindow", "<html><head/><body><p>- get ADC prints adc value and voltage of σ<span style=\" font-size:9pt; vertical-align:sub;\">1 </span><span style=\" font-size:9pt;\">l</span>oadcell and σ<span style=\" vertical-align:sub;\">3 </span>oilpressure</p><p>in console</p></body></html>"))
+        self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_5), _translate("MainWindow", "General"))
+        self.label_19.setText(_translate("MainWindow", "<html><head/><body><p>- prequench rpm: to open valve until oilpressure changes (fast)</p><p>- quench rpm: to open the valve all the way open (slow)</p><p>(target position := valve all the way opened)</p><p>- dsigma setpoint is the const. diff. stress [Mpa] </p><p>s1 establishes via PID as a passive reaction on s3 action<br/></p></body></html>"))
+        self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_6), _translate("MainWindow", "For Quenching"))
+
 from pyqtgraph import PlotWidget
 
 

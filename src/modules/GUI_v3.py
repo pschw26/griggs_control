@@ -270,7 +270,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_update_quench.clicked.connect(lambda: self.update_PID('quench'))
         # close oilvalve as long as button pressed in gui
         self.pushB_close_valve.pressed.connect(lambda: self.goto_s3(self.valve_closed, 
-                                                                    self.rpmBox_prequench.value()))
+                                                                    self.rpmBox_s3.value()))
         self.pushB_close_valve.released.connect(self.stop_motor)
         # set closed position of valve 
         self.pushB_set_closed.clicked.connect(self.set_closed)
