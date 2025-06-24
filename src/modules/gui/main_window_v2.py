@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'main_window.ui'
+
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -341,6 +342,11 @@ class Ui_MainWindow(object):
         self.label_19.setGeometry(QtCore.QRect(10, 0, 411, 161))
         self.label_19.setObjectName("label_19")
         self.tabWidget_2.addTab(self.tab_6, "")
+# <<<<<<< HEAD
+#         MainWindow.setCentralWidget(self.centralwidget)
+#         self.menubar = QtWidgets.QMenuBar(MainWindow)
+#         self.menubar.setGeometry(QtCore.QRect(0, 0, 835, 26))
+# =======
         self.valve_sys_info = QtWidgets.QWidget()
         self.valve_sys_info.setObjectName("valve_sys_info")
         self.frame_2 = QtWidgets.QFrame(self.valve_sys_info)
@@ -567,7 +573,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(3)
+        self.tabWidget.setCurrentIndex(2)
         self.tabWidget_2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 

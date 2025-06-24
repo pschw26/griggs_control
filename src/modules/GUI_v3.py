@@ -19,7 +19,7 @@ import pandas as pd
 
 # import time
 
-from modules.gui.main_window_v1 import Ui_MainWindow #TODO
+from modules.gui.main_window_v2 import Ui_MainWindow #TODO
 from modules.set_init_gui_settings_v1 import init_gui
 from modules.popup_warning_v0 import CustomDialog
 from .Motor import Motor
@@ -163,7 +163,7 @@ class Window(QMainWindow, Ui_MainWindow):
             raise ValueError('actual position of s3-motor and current positon in positions_valve.txt do not match')
         print(f"valve offset is: {self.valve_init_offset}, closed position is: {self.valve_closed}, opened: {self.valve_opened}")
         self.is_valve_closed()
-        self.label_s3.setText(f'{self.get_ratio(self.valve_current, self.valve_closed)} / 1000 bar')
+        self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         
         
         # Queue für Kommunikation zwischen Observer und Hauptprogramm
@@ -224,10 +224,10 @@ class Window(QMainWindow, Ui_MainWindow):
                 (lambda arg1, arg2: arg1 if self.tabWidget.currentIndex() < 2 else arg2)(self.module_s1, self.module_s3)
             )
         ))
-        self.tabWidget.currentChanged.connect(lambda: 
-                                              self.tabWidget_2.setCurrentIndex(
-                                                  (lambda i: 4 if i%4==0 else 1)(self.tabWidget.currentIndex())
-                                                  ))
+        self.tabWidget.currentChanged.connect(lambda:
+                                               self.tabWidget_2.setCurrentIndex(
+                                                   (lambda i: 1 if i//3==1 else 0)(self.tabWidget.currentIndex())
+                                                   ))
         # Multi step rotation:
             # s1
         self.pushB_multi_up_s1.clicked.connect(self.multi_step_up)
@@ -283,21 +283,21 @@ class Window(QMainWindow, Ui_MainWindow):
         
     def is_valve_closed(self):
         # print(f"closed: {self.valve_closed} current: {self.valve_current}")
-        if abs(abs(self.valve_closed) - abs(self.valve_current)) > self.threshold_valve:
+        if abs(abs(self.valve_closed) - abs(self.motor_s3.actual_position)) > self.threshold_valve:
             self.pushB_multi_up_s3.setEnabled(False)
             self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
-            self.label_valve_s3.setStyleSheet('color: rgb(200, 50, 0)')
+            self.label_valve_s3.setStyleSheet('background-color: rgb(200, 50, 0)')
             print('Warning: oil valve is not closed all the way!',
-                  f'Motor is off by = {abs(abs(self.valve_closed) - abs(self.valve_current))} steps',  
+                  f'Motor is off by = {abs(abs(self.valve_closed) - abs(self.motor_s3.actual_position))} steps',  
                   ' press "close oil valve"-button to close it!')
         else: 
             self.pushB_multi_up_s3.setEnabled(True)
             self.pushB_perm_up_s3.setEnabled(True) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
-            self.label_valve_s3.setStyleSheet('color: rgb(0, 200, 100)')
+            self.label_valve_s3.setStyleSheet('background-color: rgb(0, 200, 100)')
             print('s3 motor valve closed. Motor is off by',
-                  f' = {abs(abs(self.valve_closed) - abs(self.valve_current))} steps')
+                  f' = {abs(abs(self.valve_closed) - abs(self.motor_s3.actual_position))} steps')
 
     ###   DATA MANAGEMENT   ###
     
@@ -494,6 +494,7 @@ class Window(QMainWindow, Ui_MainWindow):
         return round(rpm, 4)
     
     def get_ratio(self, val, closed):
+        # print("value given:", val, "closed ref value:", closed )
         # print(val, low_bound, up_bound)
         # if not (low_bound <= val <= up_bound):
         #     raise ValueError("Value is not within the given bounds.")
@@ -650,7 +651,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_multi_up_s3.setEnabled(False)
         self.pushB_perm_up_s3.setEnabled(False)
         self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
-        self.label_valve_s3.setStyleSheet('color: rgb(200, 50, 0)')
+        self.label_valve_s3.setStyleSheet('background-color: rgb(200, 50, 0)')
         self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         # when valve closed
         if abs(self.motor_s3.actual_position - pos) <= self.threshold_valve:
@@ -658,7 +659,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.pushB_multi_up_s3.setEnabled(True)
             self.pushB_perm_up_s3.setEnabled(True)
             self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
-            self.label_valve_s3.setStyleSheet('color: rgb(0, 200, 100)')
+            self.label_valve_s3.setStyleSheet('background-color: rgb(0, 200, 100)')
             self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
             
     def prequench_hold(self, threshold):
@@ -671,7 +672,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('this function is only enabled if quench PID is operating!')
             
     def set_closed(self):
-        self.valve_closed = self.module_s3.motor.actual_position+self.valve_init_offset
+        self.valve_closed = self.module_s3.motor.actual_position #+ self.valve_init_offset TODO: is this correct
         self.valve_opened = self.valve_closed + self.valve_distance #TODO: does this work?
         self.positions.loc[0, 'closed'] = self.valve_closed
         self.positions.to_csv(
@@ -680,7 +681,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_multi_up_s3.setEnabled(True)
         self.pushB_perm_up_s3.setEnabled(True)
         self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
-        self.label_valve_s3.setStyleSheet('color: rgb(0, 200, 100)')
+        self.label_valve_s3.setStyleSheet('background-color: rgb(0, 200, 100)')
         
         
     def drive_PID(self):
