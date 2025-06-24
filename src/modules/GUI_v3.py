@@ -29,10 +29,6 @@ import queue
 
 
 
-
-
-
-
 '''TODO:
         - close valve function: get posititons and colors right #DONEish
         - go over new names for widgets #DONE

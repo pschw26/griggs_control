@@ -961,6 +961,19 @@
      <string>actual velocity</string>
     </property>
    </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>180</y>
+      <width>461</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;General:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- get ADC prints adc value and voltage of σ&lt;span style=&quot; font-size:9pt; vertical-align:sub;&quot;&gt;1 &lt;/span&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;l&lt;/span&gt;oadcell and σ&lt;span style=&quot; vertical-align:sub;&quot;&gt;3 &lt;/span&gt;oilpressure&lt;/p&gt;&lt;p&gt;in console&lt;/p&gt;&lt;p&gt;- for redefinition of closed with perm close, use v &amp;lt;= 0.25 RPM!&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;For Quenching: &lt;/span&gt;&lt;/p&gt;&lt;p&gt;- prequench rpm: to open valve until oilpressure changes (fast)&lt;/p&gt;&lt;p&gt;- quench rpm: to open the valve all the way open (slow)&lt;/p&gt;&lt;p&gt;(target position := valve all the way opened)&lt;/p&gt;&lt;p&gt;- dsigma setpoint is the const. diff. stress [Mpa] &lt;/p&gt;&lt;p&gt;s1 establishes via PID as a passive reaction on s3 action&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
    <widget class="QLabel" name="label_16">
     <property name="geometry">
      <rect>
