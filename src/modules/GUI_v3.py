@@ -167,7 +167,7 @@ class Window(QMainWindow, Ui_MainWindow):
             raise ValueError('actual position of s3-motor and current positon in positions_valve.txt do not match')
         print(f"valve offset is: {self.valve_init_offset}, closed position is: {self.valve_closed}, opened: {self.valve_opened}")
         self.is_valve_closed()
-        self.label_s3.setText(f'{self.get_ratio(self.valve_current, self.valve_closed)} / 1000 bar')
+        self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         
         
         # Queue für Kommunikation zwischen Observer und Hauptprogramm
@@ -283,7 +283,7 @@ class Window(QMainWindow, Ui_MainWindow):
         
     def is_valve_closed(self):
         # print(f"closed: {self.valve_closed} current: {self.valve_current}")
-        if abs(abs(self.valve_closed) - abs(self.valve_current)) > self.threshold_valve:
+        if abs(abs(self.valve_closed) - abs(self.motor_s3.actual_position)) > self.threshold_valve:
             self.pushB_multi_up_s3.setEnabled(False)
             self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
@@ -492,6 +492,7 @@ class Window(QMainWindow, Ui_MainWindow):
         return round(rpm, 4)
     
     def get_ratio(self, val, closed):
+        # print("value given:", val, "closed ref value:", closed )
         # print(val, low_bound, up_bound)
         # if not (low_bound <= val <= up_bound):
         #     raise ValueError("Value is not within the given bounds.")
@@ -667,7 +668,7 @@ class Window(QMainWindow, Ui_MainWindow):
             print('this function is only enabled if quench PID is operating!')
             
     def set_closed(self):
-        self.valve_closed = self.module_s3.motor.actual_position+self.valve_init_offset
+        self.valve_closed = self.module_s3.motor.actual_position #+ self.valve_init_offset TODO: is this correct
         self.valve_opened = self.valve_closed + self.valve_distance #TODO: does this work?
         self.positions.loc[0, 'closed'] = self.valve_closed
         self.positions.to_csv(
