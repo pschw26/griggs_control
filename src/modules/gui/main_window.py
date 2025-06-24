@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+
 # Form implementation generated from reading ui file 'C:\Users\folzn\OneDrive\Dokumente\GitKraken\griggs_control\src\modules\gui\main_window.ui'
+
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -279,6 +281,7 @@ class Ui_MainWindow(object):
         self.invert_checkBox.setGeometry(QtCore.QRect(130, 390, 191, 21))
         self.invert_checkBox.setObjectName("invert_checkBox")
         self.lcd_actvel_s1 = QtWidgets.QLCDNumber(self.centralwidget)
+
         self.lcd_actvel_s1.setGeometry(QtCore.QRect(500, 300, 64, 23))
         self.lcd_actvel_s1.setSmallDecimalPoint(False)
         self.lcd_actvel_s1.setObjectName("lcd_actvel_s1")
@@ -418,6 +421,7 @@ class Ui_MainWindow(object):
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_5), _translate("MainWindow", "General"))
         self.label_19.setText(_translate("MainWindow", "<html><head/><body><p>- prequench rpm: to open valve until oilpressure changes (fast)</p><p>- quench rpm: to open the valve all the way open (slow)</p><p>(target position := valve all the way opened)</p><p>- dsigma setpoint is the const. diff. stress [Mpa] </p><p>s1 establishes via PID as a passive reaction on s3 action<br/></p></body></html>"))
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_6), _translate("MainWindow", "For Quenching"))
+
 from pyqtgraph import PlotWidget
 
 
