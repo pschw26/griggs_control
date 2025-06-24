@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'main_window.ui'
-
 #
 # Created by: PyQt5 UI code generator 5.15.9
 #
@@ -339,14 +338,9 @@ class Ui_MainWindow(object):
         self.tab_6 = QtWidgets.QWidget()
         self.tab_6.setObjectName("tab_6")
         self.label_19 = QtWidgets.QLabel(self.tab_6)
-        self.label_19.setGeometry(QtCore.QRect(10, 0, 411, 161))
+        self.label_19.setGeometry(QtCore.QRect(10, 0, 411, 191))
         self.label_19.setObjectName("label_19")
         self.tabWidget_2.addTab(self.tab_6, "")
-# <<<<<<< HEAD
-#         MainWindow.setCentralWidget(self.centralwidget)
-#         self.menubar = QtWidgets.QMenuBar(MainWindow)
-#         self.menubar.setGeometry(QtCore.QRect(0, 0, 835, 26))
-# =======
         self.valve_sys_info = QtWidgets.QWidget()
         self.valve_sys_info.setObjectName("valve_sys_info")
         self.frame_2 = QtWidgets.QFrame(self.valve_sys_info)
@@ -573,7 +567,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(2)
+        self.tabWidget.setCurrentIndex(3)
         self.tabWidget_2.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -636,9 +630,9 @@ class Ui_MainWindow(object):
         self.label_30.setText(_translate("MainWindow", "stress [MPa]"))
         self.label_31.setText(_translate("MainWindow", "differential Stress [MPa]"))
         self.pushB_get_adc.setText(_translate("MainWindow", "get ADC"))
-        self.label_12.setText(_translate("MainWindow", "<html><head/><body><p>- get ADC prints adc value and voltage of σ<span style=\" font-size:9pt; vertical-align:sub;\">1 </span><span style=\" font-size:9pt;\">l</span>oadcell and σ<span style=\" vertical-align:sub;\">3 </span>oilpressure</p><p>in console</p></body></html>"))
+        self.label_12.setText(_translate("MainWindow", "<html><head/><body><p>- get ADC prints adc value and voltage of σ<span style=\" font-size:9pt; vertical-align:sub;\">1</span>-motor<span style=\" vertical-align:sub;\"/><span style=\" font-size:9pt;\">l</span>oadcell and σ<span style=\" vertical-align:sub;\">3</span>-motor<span style=\" vertical-align:sub;\"/>oilpressure</p><p>in console</p></body></html>"))
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_5), _translate("MainWindow", "General"))
-        self.label_19.setText(_translate("MainWindow", "<html><head/><body><p>- prequench rpm: to open valve until oilpressure changes (fast)</p><p>- quench rpm: to open the valve all the way open (slow)</p><p>(target position := valve all the way opened)</p><p>- dsigma setpoint is the const. diff. stress [Mpa] </p><p>s1 establishes via PID as a passive reaction on s3 action<br/></p></body></html>"))
+        self.label_19.setText(_translate("MainWindow", "<html><head/><body><p>- prequench rpm: to open valve until oilpressure changes (fast)</p><p>- quench rpm: to open the valve all the way open (slow)</p><p>(target position := valve all the way opened)</p><p>- ∆σ setpoint is the const. diff. stress [Mpa] </p><p>- change ∆σ setpoint with update button</p><p>- σ<span style=\" vertical-align:sub;\">1</span>-motor is PID controlled: acts passively as reaction on σ<span style=\" vertical-align:sub;\">3</span>-motor<span style=\" vertical-align:sub;\"/> changes<br/></p></body></html>"))
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_6), _translate("MainWindow", "For Quenching"))
         self.label_valve_s3.setText(_translate("MainWindow", "3"))
         self.label_34.setText(_translate("MainWindow", "4"))
