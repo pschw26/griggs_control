@@ -161,7 +161,7 @@ class Window(QMainWindow, Ui_MainWindow):
         elif self.motor_s3.actual_position == self.valve_current:
             self.valve_init_offset = 0
         else:
-            # introduce offset var so update_pos in close_app(stop_motors(())) knows this var
+            # introduce offset var so update_pos in close_app(stop_motors()) knows this var
             self.valve_init_offset = 0
             self.close_app()
             raise ValueError('actual position of s3-motor and current positon in positions_valve.txt do not match')
@@ -228,6 +228,10 @@ class Window(QMainWindow, Ui_MainWindow):
                 (lambda arg1, arg2: arg1 if self.tabWidget.currentIndex() < 2 else arg2)(self.module_s1, self.module_s3)
             )
         ))
+        self.tabWidget.currentChanged.connect(lambda: 
+                                              self.tabWidget_2.setCurrentIndex(
+                                                  (lambda i: 4 if i%4==0 else 1)(self.tabWidget.currentIndex())
+                                                  ))
         # Multi step rotation:
             # s1
         self.pushB_multi_up_s1.clicked.connect(self.multi_step_up)
@@ -287,6 +291,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.pushB_multi_up_s3.setEnabled(False)
             self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
+            self.label_valve_s3.setStyleSheet('color: rgb(200, 50, 0)')
             print('Warning: oil valve is not closed all the way!',
                   f'Motor is off by = {abs(abs(self.valve_closed) - abs(self.valve_current))} steps',  
                   ' press "close oil valve"-button to close it!')
@@ -294,6 +299,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.pushB_multi_up_s3.setEnabled(True)
             self.pushB_perm_up_s3.setEnabled(True) #TODO: enable also for permanent??
             self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
+            self.label_valve_s3.setStyleSheet('color: rgb(0, 200, 100)')
             print('s3 motor valve closed. Motor is off by',
                   f' = {abs(abs(self.valve_closed) - abs(self.valve_current))} steps')
 
@@ -648,6 +654,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_multi_up_s3.setEnabled(False)
         self.pushB_perm_up_s3.setEnabled(False)
         self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
+        self.label_valve_s3.setStyleSheet('color: rgb(200, 50, 0)')
         self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         # when valve closed
         if abs(self.motor_s3.actual_position - pos) <= self.threshold_valve:
@@ -655,6 +662,7 @@ class Window(QMainWindow, Ui_MainWindow):
             self.pushB_multi_up_s3.setEnabled(True)
             self.pushB_perm_up_s3.setEnabled(True)
             self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
+            self.label_valve_s3.setStyleSheet('color: rgb(0, 200, 100)')
             self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
             
     def prequench_hold(self, threshold):
@@ -676,6 +684,7 @@ class Window(QMainWindow, Ui_MainWindow):
         self.pushB_multi_up_s3.setEnabled(True)
         self.pushB_perm_up_s3.setEnabled(True)
         self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
+        self.label_valve_s3.setStyleSheet('color: rgb(0, 200, 100)')
         
         
     def drive_PID(self):
