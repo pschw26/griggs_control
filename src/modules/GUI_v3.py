@@ -19,7 +19,7 @@ import pandas as pd
 
 # import time
 
-from modules.gui.main_window_v1 import Ui_MainWindow #TODO
+from modules.gui.main_window_v2 import Ui_MainWindow #TODO
 from modules.set_init_gui_settings_v1 import init_gui
 from modules.popup_warning_v0 import CustomDialog
 from .Motor import Motor
