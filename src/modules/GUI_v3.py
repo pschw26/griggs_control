@@ -98,8 +98,9 @@ class Window(QMainWindow, Ui_MainWindow):
         self.motor = self.motor_s3
         #for debugging inital position offset if motor is getting disconnected
         # print("S3 position:", self.motor_s3.actual_position)
-        # for motor s1:
-        # self.last_motor_command_s1 = None
+        # initially, the last command is none -> this is used for velocity updates with update button:
+        self.last_motor_command_s1 = None
+        self.last_motor_command_s3 = None
         # PID
         self.PID_max_vel_scale = 1  # TODO: what is this?
         # ADC connection:
@@ -528,15 +529,19 @@ class Window(QMainWindow, Ui_MainWindow):
         and then executes the last command send to the motor_s1, which is stored
         explicitly in a variable when the respective functions are called.'''
         if self.module == self.module_s1:
-            # if not self.last_motor_command_s1 == None:
-            self.module_s1.rpm = self.rpmBox_s1.value()
-            self.module_s1.update_pps()
-                # self.last_motor_command_s1()
-            # else:
-            #     print('no command given yet...')
+            if not self.last_motor_command_s1 == None:
+                self.module_s1.rpm = self.rpmBox_s1.value()
+                self.module_s1.update_pps()
+                self.last_motor_command_s1()
+            else:
+                print('no command for s1 given yet...')
         elif self.module == self.module_s3:
-            self.module_s3.rpm = self.rpmBox_s3.value()
-            self.module_s3.update_pps()
+            if not self.last_motor_command_s3 == None:
+                self.module_s3.rpm = self.rpmBox_s3.value()
+                self.module_s3.update_pps()
+                self.last_motor_command_s3()
+            else:
+                print('no command for s3 given yet...')
             
     def update_PID(self, params):  ###TODO: update for PID arguments 
         if params == 'const':
@@ -587,10 +592,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.module.update_pps()
         self.motor.rotate(self.module.pps) # positive pps -> clockwise
         if self.module == self.module_s1:
-            # self.last_motor_command_s1 = self.permanent_down()
+            self.last_motor_command_s1 = self.permanent_down()
             self.pushB_perm_down_s1.setStyleSheet("QPushButton {background-color: rgb(0, 200, 100);}")
             print('Rotating down with', str(self.rpmBox_s1.value()), 'rpm')
         else:
+            self.last_motor_command_s3 = self.permanent_down()
             self.pushB_perm_down_s3.setStyleSheet("QPushButton {background-color: rgb(0, 200, 100);}")
             print('Rotating down with', str(self.rpmBox_s3.value()), 'rpm')
             while self.motor_s3.actual_velocity != 0:
@@ -602,10 +608,11 @@ class Window(QMainWindow, Ui_MainWindow):
         self.module.update_pps()
         self.motor.rotate(self.module.pps)
         if self.module == self.module_s1:
-            # self.last_motor_command_s1 = self.permanent_up()
+            self.last_motor_command_s1 = self.permanent_up()
             self.pushB_perm_up_s1.setStyleSheet("QPushButton {background-color: rgb(0, 200, 100);}")
             print('Rotating up with', str(self.rpmBox_s1.value()), 'rpm')
         else:
+            self.last_motor_command_s3 = self.permanent_up()
             self.pushB_perm_up_s3.setStyleSheet("QPushButton {background-color: rgb(0, 200, 100);}")
             print('Rotating up with', str(self.rpmBox_s3.value()), 'rpm')
             while self.motor_s3.actual_velocity != 0:
