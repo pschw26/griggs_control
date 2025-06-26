@@ -285,18 +285,12 @@ class Window(QMainWindow, Ui_MainWindow):
     def is_valve_closed(self):
         # print(f"closed: {self.valve_closed} current: {self.valve_current}")
         if abs(abs(self.valve_closed) - abs(self.motor_s3.actual_position)) > self.threshold_valve:
-            self.pushB_multi_up_s3.setEnabled(False)
-            self.pushB_perm_up_s3.setEnabled(False) #TODO: enable also for permanent??
-            self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
-            self.label_valve_s3.setStyleSheet('background-color: rgb(200, 50, 0)')
+            self.valve_is_closed(False)
             print('Warning: oil valve is not closed all the way!',
                   f'Motor is off by = {abs(abs(self.valve_closed) - abs(self.motor_s3.actual_position))} steps',  
                   ' press "close oil valve"-button to close it!')
         else: 
-            self.pushB_multi_up_s3.setEnabled(True)
-            self.pushB_perm_up_s3.setEnabled(True) #TODO: enable also for permanent??
-            self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
-            self.label_valve_s3.setStyleSheet('background-color: rgb(0, 200, 100)')
+            self.valve_is_closed(True)
             print('s3 motor valve closed. Motor is off by',
                   f' = {abs(abs(self.valve_closed) - abs(self.motor_s3.actual_position))} steps')
 
@@ -583,6 +577,8 @@ class Window(QMainWindow, Ui_MainWindow):
         if self.module == self.module_s3:
             self.update_position()
             self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
+            if self.motor_s3.actual_position - self.valve_closed <= self.threshold_valve:
+                self.valve_is_closed(True)
         self.clear_button_colors()
         print('Motor', self.module.moduleID, 'stopped!')
         
@@ -592,13 +588,14 @@ class Window(QMainWindow, Ui_MainWindow):
         self.module.update_pps()
         self.motor.rotate(self.module.pps) # positive pps -> clockwise
         if self.module == self.module_s1:
-            self.last_motor_command_s1 = self.permanent_down()
+            self.last_motor_command_s1 = self.permanent_down
             self.pushB_perm_down_s1.setStyleSheet("QPushButton {background-color: rgb(0, 200, 100);}")
             print('Rotating down with', str(self.rpmBox_s1.value()), 'rpm')
         else:
-            self.last_motor_command_s3 = self.permanent_down()
+            self.last_motor_command_s3 = self.permanent_down
             self.pushB_perm_down_s3.setStyleSheet("QPushButton {background-color: rgb(0, 200, 100);}")
             print('Rotating down with', str(self.rpmBox_s3.value()), 'rpm')
+            self.valve_is_closed(False)
             while self.motor_s3.actual_velocity != 0:
                 QApplication.processEvents()
                 self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
@@ -608,13 +605,14 @@ class Window(QMainWindow, Ui_MainWindow):
         self.module.update_pps()
         self.motor.rotate(self.module.pps)
         if self.module == self.module_s1:
-            self.last_motor_command_s1 = self.permanent_up()
+            self.last_motor_command_s1 = self.permanent_up
             self.pushB_perm_up_s1.setStyleSheet("QPushButton {background-color: rgb(0, 200, 100);}")
             print('Rotating up with', str(self.rpmBox_s1.value()), 'rpm')
         else:
-            self.last_motor_command_s3 = self.permanent_up()
+            self.last_motor_command_s3 = self.permanent_up
             self.pushB_perm_up_s3.setStyleSheet("QPushButton {background-color: rgb(0, 200, 100);}")
             print('Rotating up with', str(self.rpmBox_s3.value()), 'rpm')
+            self.valve_is_closed(False)
             while self.motor_s3.actual_velocity != 0:
                 QApplication.processEvents()
                 self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
@@ -639,6 +637,12 @@ class Window(QMainWindow, Ui_MainWindow):
             self.msteps = int(round(self.module_s3.msteps_per_rev * self.spinB_multistep_s3.value()/320))
             self.module.update_pps()
             self.motor.move_by(self.module.dir * self.msteps * self.module.dir_inv_mod, self.module.pps)
+            if (self.motor_s3.actual_position + self.module.dir * self.msteps * self.module.dir_inv_mod) - self.valve_closed <= self.threshold_valve:
+                self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
+                self.label_valve_s3.setStyleSheet('background-color: rgb(0, 200, 100)')
+            else:
+                self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
+                self.label_valve_s3.setStyleSheet('background-color: rgb(200, 50, 0)')
             print('Coarse step up with module:', str(self.module.moduleID), 'at', str(self.rpmBox_s3.value()), 'RPM')
             while self.motor_s3.actual_velocity != 0:
                 QApplication.processEvents()
@@ -655,18 +659,12 @@ class Window(QMainWindow, Ui_MainWindow):
         print(f"goto_s3 works, aiming for {pos} currently at {self.motor_s3.actual_position}")
         self.motor_s3.move_to(pos, pps)
         # reset open_by functions for valve operation
-        self.pushB_multi_up_s3.setEnabled(False)
-        self.pushB_perm_up_s3.setEnabled(False)
-        self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
-        self.label_valve_s3.setStyleSheet('background-color: rgb(200, 50, 0)')
+        self.valve_is_closed(False)
         self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
         # when valve closed
         if abs(self.motor_s3.actual_position - pos) <= self.threshold_valve:
             self.update_position()
-            self.pushB_multi_up_s3.setEnabled(True)
-            self.pushB_perm_up_s3.setEnabled(True)
-            self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
-            self.label_valve_s3.setStyleSheet('background-color: rgb(0, 200, 100)')
+            self.valve_is_closed(True)
             self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
             
     def prequench_hold(self, threshold):
@@ -685,10 +683,20 @@ class Window(QMainWindow, Ui_MainWindow):
         self.positions.to_csv(
         'C:/Users/GriggsLab_Y/Documents/software/griggs_control/src/positions_valve.txt', index = False)
         self.label_s3.setText(f'{self.get_ratio(self.motor_s3.actual_position, self.valve_closed)} / 1000 bar')
-        self.pushB_multi_up_s3.setEnabled(True)
-        self.pushB_perm_up_s3.setEnabled(True)
-        self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
-        self.label_valve_s3.setStyleSheet('background-color: rgb(0, 200, 100)')
+        self.valve_is_closed(True)
+        
+    def valve_is_closed(self, arg):
+        '''for cosmectics'''
+        if arg == True:
+            self.pushB_multi_up_s3.setEnabled(True)
+            self.pushB_perm_up_s3.setEnabled(True)
+            self.pushB_close_valve.setStyleSheet('color: rgb(0, 200, 100)')
+            self.label_valve_s3.setStyleSheet('background-color: rgb(0, 200, 100)')
+        elif arg == False:
+            self.pushB_multi_up_s3.setEnabled(False)
+            self.pushB_perm_up_s3.setEnabled(False)
+            self.pushB_close_valve.setStyleSheet('color: rgb(200, 50, 0)')
+            self.label_valve_s3.setStyleSheet('background-color: rgb(200, 50, 0)')
         
         
     def drive_PID(self):
